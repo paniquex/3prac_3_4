@@ -12,23 +12,22 @@ int main() {
         return 0;
     }
     write(1, &SCREEN_PID, sizeof(pid_t));
-    printf("%d", SCREEN_PID);
-   // if ((BUTTON_PID = fork()) == 0) {
-   //     SCREEN_PID = 23;
-   //     write(1, &SCREEN_PID, sizeof(int));
-   //     //pause();
-   //     return 0;
-   // }
-  //  if ((NOTESCHANGER_PID = fork()) == 0) {
-  //      //pause();
-  //      return 0;
-  //  }
-  //  if ((MECH_PID = fork()) == 0) {
-  //      //pause();
-  //      return 0;
-  //  }
-  //  wait(NULL);
-  //  wait(NULL);
+    if ((BUTTON_PID = fork()) == 0) {
+        SCREEN_PID = 23;
+        write(1, &SCREEN_PID, sizeof(int));
+        //pause();
+        return 0;
+    }
+    if ((NOTESCHANGER_PID = fork()) == 0) {
+        //pause();
+        return 0;
+    }
+    if ((MECH_PID = fork()) == 0) {
+        //pause();
+        return 0;
+    }
+    wait(NULL);
+    wait(NULL);
     wait(NULL);
     wait(NULL);
     return 0;
