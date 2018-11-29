@@ -11,7 +11,7 @@ int main() {
         //pause();
         return 0;
     }
-    write(1, &SCREEN_PID, sizeof(pid_t));
+    write(1, &SCREEN_PID, 1);
     if ((BUTTON_PID = fork()) == 0) {
         SCREEN_PID = 23;
         write(1, &SCREEN_PID, sizeof(int));
