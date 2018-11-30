@@ -1,5 +1,12 @@
 #ifndef PRAC3_3_4_HANDLERS_H
 #define PRAC3_3_4_HANDLERS_H
+#include <string.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <signal.h>
+
+pid_t SCREEN_PID, BUTTON_PID, NOTESCHANGER_PID, MECH_PID; // const but no? codestyle!!
 
 
 /* SCREEN handlers */
