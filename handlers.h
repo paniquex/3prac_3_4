@@ -12,7 +12,7 @@ const char* MECH_SCRIPT_NAME;
 const char* NOTESCHANGER_SCRIPT_NAME;
 const char* BUTTON_SCRIPT_NAME;
 
-enum {NOTE1 = 25, NOTE2 = 50};
+enum {NOTE1 = 25, NOTE2 = 60};
 enum {USERSIGNAL1 = 30, USERSIGNAL2 = 10, USERSIGNAL3 = 16,
     USERSIGNAL4 = 31, USERSIGNAL5 = 12, USERSIGNAL6 = 17};
 
@@ -20,7 +20,7 @@ enum {USERSIGNAL1 = 30, USERSIGNAL2 = 10, USERSIGNAL3 = 16,
 //char *mech_status_message[MAX_STATUS_MESSAGE_SIZE] = {"\0"};
 //char *noteschanger_status_message[MAX_STATUS_MESSAGE_SIZE] = {"\0"};
 //char *button_status_message[MAX_STATUS_MESSAGE_SIZE] = {"\0"};
-int screen_status, mech_status, noteschanger_status, button_status;
+int screen_status, mech_status, noteschanger_status, button_status, button_ready_to_click;
 
 
 pid_t SCREEN_PID, BUTTON_PID, NOTESCHANGER_PID, MECH_PID; // const but no? codestyle!!
@@ -28,13 +28,13 @@ pid_t SCREEN_PID, BUTTON_PID, NOTESCHANGER_PID, MECH_PID; // const but no? codes
 
 /* SCREEN handlers */
 void
-deficit_money(int sig);
-
-void
 enough_money(int sig);
 
 void
-add_money(int sig);
+add_money1(int sig);
+
+void
+add_money2(int sig);
 
 void
 status_screen(int sig);
@@ -49,7 +49,10 @@ status_mech(int sig);
 
 /* NOTECHANGER handlers: */
 void
-receive_money(int sig);
+receive_money1(int sig);
+
+void
+receive_money2(int sig);
 
 void
 status_noteschanger(int sig);
@@ -57,6 +60,9 @@ status_noteschanger(int sig);
 /* BUTTON handlers: */
 void
 click(int sig);
+
+void
+item_was_put_away(int sig);
 
 void
 status_button(int sig);

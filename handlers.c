@@ -12,35 +12,22 @@ int screen_status = 0, mech_status = 0, noteschanger_status = 0, button_status =
 
 /* SCREEN handlers */
 void
-deficit_money(int sig) {
-    char *notEnoughMoneyStr = "Not enough money\n";
-    int time = 3;
-    fprintf(stdout, "%s", notEnoughMoneyStr);
-    //fflush(stdout);
-    //alarm(time);
-    //pause();
-    sleep(time);
-    //fflush(stdout);
-}
-
-
-void
 enough_money(int sig) { //need to rename this function
     char *amountStatus = "Current amount: ";
+    //signal(USERSIGNAL2, SIG_IGN); //ignore USERSIGNAL2 from button before item has put away
     if (amount >= ITEM_COST) {
         amount -= ITEM_COST;
         kill(MECH_PID, USERSIGNAL1);
         fprintf(stdout, "%s", amountStatus);
         fprintf(stdout, "%d\n", amount);
+        //pause(); //waiting for signal from MECH
     } else {
         int time = 3;
         char *notEnoughMoneyStr = "Not enough money\n";
         fprintf(stdout, "%s", notEnoughMoneyStr);
         fprintf(stdout, "%s", amountStatus);
         fprintf(stdout, "%d\n", amount);
-        //fflush(stdout);
-        //alarm(time);
-        //pause();
+        kill(BUTTON_PID, USERSIGNAL2);
         screen_status = 1;
         sleep(time);
         screen_status = 0;
@@ -50,18 +37,26 @@ enough_money(int sig) { //need to rename this function
 
 
 void
-add_money(int sig) {
+add_money1(int sig) {
     char *amountStatus = "Current amount: ";
     amount += NOTE1;
     fprintf(stdout, "%s", amountStatus);
     fprintf(stdout, "%d\n", amount);
-    //fflush(stdout);
+}
+
+
+void
+add_money2(int sig) {
+    char *amountStatus = "Current amount: ";
+    amount += NOTE2;
+    fprintf(stdout, "%s", amountStatus);
+    fprintf(stdout, "%d\n", amount);
 }
 
 
 void
 status_screen(int sig) {
-    printf("SCREEN: Current amount: %d\n", amount);
+    fprintf(stderr, "SCREEN: Current amount: %d\n", amount);
 }
 
 /* MECH handlers */
@@ -73,35 +68,47 @@ put_item(int sig) {
     sleep(time);
     mech_status = 0;
     fprintf(stdout, "Get your item!\n");
+    kill(BUTTON_PID, USERSIGNAL2);
 }
 
 
 void
 status_mech(int sig) {
     if (mech_status == 1) {
-        printf("MECH: Putting item away...\n");
+        fprintf(stderr, "MECH: Putting item away...\n");
     } else {
-        printf("MECH: Idle...\n");
+        fprintf(stderr, "MECH: Idle...\n");
     }
 }
 
 
 /* NOTECHANGER handlers */
 void
-receive_money(int sig) {
-    noteschanger_status = 1;
-    sleep(3);
-    noteschanger_status = 0;
-    kill(SCREEN_PID, USERSIGNAL1);
+receive_money1(int sig) {
+    if (noteschanger_status == 0) {
+        noteschanger_status = 1;
+        sleep(3);
+        noteschanger_status = 0;
+        kill(SCREEN_PID, USERSIGNAL1);
+    }
 }
 
+void
+receive_money2(int sig) {
+    if (noteschanger_status == 0) {
+        noteschanger_status = 1;
+        sleep(3);
+        noteschanger_status = 0;
+        kill(SCREEN_PID, USERSIGNAL4);
+    }
+}
 
 void
 status_noteschanger(int sig) {
     if (noteschanger_status == 1) {
-        printf("NOTECHANGER: Receiving money...\n");
+        fprintf(stderr, "NOTECHANGER: Receiving money...\n");
     } else {
-        printf("NOTECHANGER: Idle...\n");
+        fprintf(stderr, "NOTECHANGER: Idle...\n");
     }
 }
 
@@ -109,13 +116,23 @@ status_noteschanger(int sig) {
 /* BUTTON handlers */
 void
 click(int sig) {
-    kill(SCREEN_PID, USERSIGNAL2);
+    button_status++;
+    if (button_ready_to_click == 1) {
+        kill(SCREEN_PID, USERSIGNAL2);
+        button_ready_to_click = 0;
+        pause(); //waiting for signal from MECH, that it has done work
+    }
+    button_ready_to_click = 1;
 }
 
+void
+item_was_put_away(int sig) {
+    //just for remove pause from BUTTON
+}
 
 void
 status_button(int sig) {
-    printf("BUTTON: Was clicked.\n");
+    fprintf(stderr, "BUTTON: was clicked %d times.\n", button_status);
 }
 
 
@@ -142,9 +159,13 @@ void
 sigint_handler(int sig) {
     printf("***************  STATUS  ***************\n");
     kill(SCREEN_PID, USERSIGNAL3);
+    sleep(1);
     kill(MECH_PID, USERSIGNAL3);
+    sleep(1);
     kill(NOTESCHANGER_PID, USERSIGNAL3);
+    sleep(1);
     kill(BUTTON_PID, USERSIGNAL3);
-    pause();
+    sleep(1);
     printf("***************  STATUS  ***************\n");
+    //pause();
 }
