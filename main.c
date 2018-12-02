@@ -16,8 +16,14 @@ script_creator(const char *script_name, pid_t pid, int signal_id);
 int main() {
     fprintf(stdout, "%d\n", getpid());
     //init status messages;
+    int fd[2];
+    pipe(fd);
 
     if ((MECH_PID = fork()) == 0) {
+        close(fd[1]);
+        read(fd[0], &BUTTON_PID, sizeof(pid_t));
+        close(fd[0]);
+        printf("%d\n", BUTTON_PID);
         signal(USERSIGNAL1, put_item);
         signal(SIGINT, SIG_IGN); //ignore SIGINT
         signal(USERSIGNAL3, status_mech);
@@ -29,9 +35,13 @@ int main() {
 
 
     if ((SCREEN_PID = fork()) == 0) {
+        close(fd[1]);
+        read(fd[0], &BUTTON_PID, sizeof(pid_t));
+        close(fd[0]);
         //signal(USERSIGNAL1, deficit_money);
         signal(USERSIGNAL2, enough_money);
-        signal(USERSIGNAL1, add_money);
+        signal(USERSIGNAL1, add_money1);
+        signal(USERSIGNAL4, add_money2);
         signal(SIGINT, SIG_IGN); //ignore SIGINT
         signal(USERSIGNAL3, status_screen);
         do {
@@ -42,7 +52,12 @@ int main() {
 
 
     if ((BUTTON_PID = fork()) == 0) {
+        close(fd[0]);
+        close(fd[1]);
+        button_status = 0;
+        button_ready_to_click = 1;
         signal(USERSIGNAL1, click);
+        signal(USERSIGNAL2, item_was_put_away);
         signal(SIGINT, SIG_IGN); //ignore SIGINT
         signal(USERSIGNAL3, status_button);
         do {
@@ -50,10 +65,17 @@ int main() {
         } while (button_flag == 1);
         return 0;
     }
+    write(fd[1], &BUTTON_PID, sizeof(pid_t));
+    write(fd[1], &BUTTON_PID, sizeof(pid_t));
+    close(fd[0]);
+    close(fd[1]);
 
 
     if ((NOTESCHANGER_PID = fork()) == 0) {
-        signal(USERSIGNAL1, receive_money);
+        close(fd[0]);
+        close(fd[1]);
+        signal(USERSIGNAL1, receive_money1);
+        signal(USERSIGNAL2, receive_money2);
         signal(SIGINT, SIG_IGN); //ignore SIGINT
         signal(USERSIGNAL3, status_noteschanger);
         do {
