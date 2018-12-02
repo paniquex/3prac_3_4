@@ -16,6 +16,13 @@ enum {NOTE1 = 25, NOTE2 = 50};
 enum {USERSIGNAL1 = 30, USERSIGNAL2 = 10, USERSIGNAL3 = 16,
     USERSIGNAL4 = 31, USERSIGNAL5 = 12, USERSIGNAL6 = 17};
 
+//char *screen_status_message[MAX_STATUS_MESSAGE_SIZE] = {"\0"};
+//char *mech_status_message[MAX_STATUS_MESSAGE_SIZE] = {"\0"};
+//char *noteschanger_status_message[MAX_STATUS_MESSAGE_SIZE] = {"\0"};
+//char *button_status_message[MAX_STATUS_MESSAGE_SIZE] = {"\0"};
+int screen_status, mech_status, noteschanger_status, button_status;
+
+
 pid_t SCREEN_PID, BUTTON_PID, NOTESCHANGER_PID, MECH_PID; // const but no? codestyle!!
 
 
@@ -29,20 +36,30 @@ enough_money(int sig);
 void
 add_money(int sig);
 
+void
+status_screen(int sig);
+
 
 /* MECH handlers: */
-void put_item(int sig);
+void
+put_item(int sig);
 
+void
+status_mech(int sig);
 
 /* NOTECHANGER handlers: */
 void
 receive_money(int sig);
 
+void
+status_noteschanger(int sig);
 
 /* BUTTON handlers: */
 void
 click(int sig);
 
+void
+status_button(int sig);
 
 /*SIGTERM */
 void
