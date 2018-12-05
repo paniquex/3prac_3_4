@@ -31,10 +31,7 @@ void
 enough_money(int sig);
 
 void
-add_money1(int sig);
-
-void
-add_money2(int sig);
+add_money(int sig);
 
 void
 status_screen(int sig);
@@ -49,10 +46,8 @@ status_mech(int sig);
 
 /* NOTECHANGER handlers: */
 void
-receive_money1(int sig);
+receive_money(int sig);
 
-void
-receive_money2(int sig);
 
 void
 status_noteschanger(int sig);

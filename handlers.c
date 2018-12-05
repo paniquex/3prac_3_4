@@ -20,7 +20,6 @@ enough_money(int sig) { //need to rename this function
         kill(MECH_PID, USERSIGNAL1);
         fprintf(stdout, "%s", amountStatus);
         fprintf(stdout, "%d\n", amount);
-        //pause(); //waiting for signal from MECH
     } else {
         int time = 3;
         char *notEnoughMoneyStr = "Not enough money\n";
@@ -32,23 +31,17 @@ enough_money(int sig) { //need to rename this function
         sleep(time);
         screen_status = 0;
     }
-    //fflush(stdout);
 }
 
 
 void
-add_money1(int sig) {
+add_money(int sig) {
     char *amountStatus = "Current amount: ";
-    amount += NOTE1;
-    fprintf(stdout, "%s", amountStatus);
-    fprintf(stdout, "%d\n", amount);
-}
-
-
-void
-add_money2(int sig) {
-    char *amountStatus = "Current amount: ";
-    amount += NOTE2;
+    if (sig == USERSIGNAL1) {
+        amount += NOTE1;
+    } else if (sig == USERSIGNAL4) {
+        amount += NOTE2;
+    }
     fprintf(stdout, "%s", amountStatus);
     fprintf(stdout, "%d\n", amount);
 }
@@ -63,7 +56,7 @@ status_screen(int sig) {
 void
 put_item(int sig) {
     fprintf(stdout, "Putting item away...\n");
-    int time = 3;
+    unsigned int time = 3;
     mech_status = 1;
     sleep(time);
     mech_status = 0;
@@ -84,24 +77,26 @@ status_mech(int sig) {
 
 /* NOTECHANGER handlers */
 void
-receive_money1(int sig) {
+receive_money(int sig) {
     if (noteschanger_status == 0) {
-        noteschanger_status = 1;
-        sleep(3);
-        noteschanger_status = 0;
-        kill(SCREEN_PID, USERSIGNAL1);
+        if (sig == USERSIGNAL1) {
+            noteschanger_status = 1;
+            signal(USERSIGNAL2, SIG_IGN);
+            sleep(3);
+            signal(USERSIGNAL2, receive_money);
+            noteschanger_status = 0;
+            kill(SCREEN_PID, USERSIGNAL1);
+        } else if (sig == USERSIGNAL2) {
+            noteschanger_status = 1;
+            signal(USERSIGNAL1, SIG_IGN);
+            sleep(3);
+            signal(USERSIGNAL1, receive_money);
+            noteschanger_status = 0;
+            kill(SCREEN_PID, USERSIGNAL4);
+        }
     }
 }
 
-void
-receive_money2(int sig) {
-    if (noteschanger_status == 0) {
-        noteschanger_status = 1;
-        sleep(3);
-        noteschanger_status = 0;
-        kill(SCREEN_PID, USERSIGNAL4);
-    }
-}
 
 void
 status_noteschanger(int sig) {
@@ -158,6 +153,7 @@ sigterm_handler(int sig) {
 void
 sigint_handler(int sig) {
     printf("***************  STATUS  ***************\n");
+    sleep(1);
     kill(SCREEN_PID, USERSIGNAL3);
     sleep(1);
     kill(MECH_PID, USERSIGNAL3);
