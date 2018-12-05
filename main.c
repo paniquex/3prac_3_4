@@ -40,8 +40,8 @@ int main() {
         close(fd[0]);
         //signal(USERSIGNAL1, deficit_money);
         signal(USERSIGNAL2, enough_money);
-        signal(USERSIGNAL1, add_money1);
-        signal(USERSIGNAL4, add_money2);
+        signal(USERSIGNAL1, add_money);
+        signal(USERSIGNAL4, add_money);
         signal(SIGINT, SIG_IGN); //ignore SIGINT
         signal(USERSIGNAL3, status_screen);
         do {
@@ -74,8 +74,8 @@ int main() {
     if ((NOTESCHANGER_PID = fork()) == 0) {
         close(fd[0]);
         close(fd[1]);
-        signal(USERSIGNAL1, receive_money1);
-        signal(USERSIGNAL2, receive_money2);
+        signal(USERSIGNAL1, receive_money);
+        signal(USERSIGNAL2, receive_money);
         signal(SIGINT, SIG_IGN); //ignore SIGINT
         signal(USERSIGNAL3, status_noteschanger);
         do {
